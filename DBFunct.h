@@ -16,11 +16,12 @@
     #include <sys/stat.h>
 #endif
 
-
-
+// Create Database Directory Function
 void createDB() {
     char dirname[] = "database";
     int check = mkdir(dirname,0777);
+
+    //Check if directory created or exists
     if (!check) {
         return;
     } else {
@@ -28,12 +29,15 @@ void createDB() {
     }
 }
 
+// Insert into Database Function
 void insertDB(char accName[50], char accType[10], char accID[50], char pin[50], int accNum) {
     float balance = 0;
     char filename[20];
     FILE *fptr;
     sprintf(filename, "database/%d.txt", accNum);
     fptr = fopen(filename, "w");
+
+    // Print account details to file
     if (fptr == NULL) {
         printf("Error opening file!\n");
         return;
@@ -48,6 +52,7 @@ void insertDB(char accName[50], char accType[10], char accID[50], char pin[50], 
     }
 }
 
+// Generate Account Number Function
 int generateAccNum() {
     char filename[20];
     FILE *fptr;
@@ -73,6 +78,7 @@ int generateAccNum() {
     }
 }
 
+// Get Bank Account List Function
 int *BankAccList(int size) {
     char filename[20];
     FILE *fptr;
@@ -105,6 +111,7 @@ int *BankAccList(int size) {
 
 }
 
+// Delete Bank Account Function
 void deleteAcc(int accNum, char idLast4[50], char inputPin[50]) {
     char filename[20];
     FILE *fptr;
@@ -124,6 +131,7 @@ void deleteAcc(int accNum, char idLast4[50], char inputPin[50]) {
         return;
     }
 
+    // Verify ID and PIN
     while (fgets(line, sizeof(line), fptr)) {
         if (sscanf(line, "ID: %d", &FullID) == 1) {
             if (FullID % 10000 != NUMidLast4) {
@@ -147,6 +155,7 @@ void deleteAcc(int accNum, char idLast4[50], char inputPin[50]) {
 
     fclose(fptr);
     
+    // Confirm deletion
     while (true) {
         printf("Are you sure you want to delete account %d? (Y/N): ", accNum); 
         scanf(" %c", &confirm);
@@ -172,6 +181,7 @@ void deleteAcc(int accNum, char idLast4[50], char inputPin[50]) {
 
     }
 
+// Deposit Function
 void depositAcc(float amount, int accNum, char inputPin[50]) {
     char filename[20];
     FILE *fptr;
@@ -190,6 +200,7 @@ void depositAcc(float amount, int accNum, char inputPin[50]) {
         return;
     }
 
+    // Verify PIN
     while (fgets(line[count], sizeof(line[count]), fptr)) {
         if (sscanf(line[count], "PIN: %d", &PIN) == 1) {
             if (PIN != NUMinputPin) {
@@ -229,6 +240,8 @@ void depositAcc(float amount, int accNum, char inputPin[50]) {
     printf("====================================================\n");
 }
 
+
+// Withdrawal Function
 void withdrawAcc(float amount, int accNum, char inputPin[50]) {
     char filename[20];
     FILE *fptr;
@@ -245,6 +258,7 @@ void withdrawAcc(float amount, int accNum, char inputPin[50]) {
         return;
     }
 
+    // Verify PIN
     while (fgets(line[count], sizeof(line[count]), fptr)) {
         if (sscanf(line[count], "PIN: %d", &PIN) == 1) {
             if (PIN != NUMinputPin) {
@@ -257,6 +271,7 @@ void withdrawAcc(float amount, int accNum, char inputPin[50]) {
     }
     fclose(fptr);
 
+    // Check sufficient balance and update
     for (int i = 0; i < count; i++) {
         if (sscanf(line[i], "Balance: %f", &balance) == 1) {
             if (balance < amount) {
@@ -285,6 +300,7 @@ void withdrawAcc(float amount, int accNum, char inputPin[50]) {
     printf("Withdraw successful. Current balance: RM %.2f\n", balance);
 }
 
+// Remittance Function
 void remittanceAcc(float amount, int senderAccNum, int receiverAccNum, char inputPin[50]) {
     char senderFilename[20], receiverFilename[20];
     FILE *fptr;
@@ -304,6 +320,7 @@ void remittanceAcc(float amount, int senderAccNum, int receiverAccNum, char inpu
         return;
     }
 
+    // Verify PIN and get account type
     while (fgets(senderLine[senderCount], sizeof(senderLine[senderCount]), fptr)) {
         if (sscanf(senderLine[senderCount], "PIN: %d", &PIN) == 1) {
             if (PIN != NUMinputPin) {
@@ -331,6 +348,7 @@ void remittanceAcc(float amount, int senderAccNum, int receiverAccNum, char inpu
 
     fclose(fptr);
 
+    // Determine fee based on account types
     for (int i = 0; senderType[i]; i++) {
         senderType[i] = tolower(senderType[i]);
     }
@@ -408,6 +426,7 @@ void remittanceAcc(float amount, int senderAccNum, int receiverAccNum, char inpu
     printf("Remittance successful. Sender's current balance: RM %.2f\n", senderBalance);
 }
 
+// Log Transaction Function
 void logTransaction(const char* action, int accNum, float amount) {
     FILE *fptr;
     fptr = fopen("database/transaction.log", "a");

@@ -24,6 +24,8 @@ void createAccount() {
     printf("Create Bank Account\n");
     printf("======================================\n");
     printf("Enter '0' to return to menu...\n");
+
+    //Name input
     printf("Enter your name: ");
     scanf("%49s", accName);
     if (strcmp(accName, "0") == 0) {
@@ -31,13 +33,14 @@ void createAccount() {
         return;
     } 
 
+    //ID number input
     while (true) {
         isNum = true;
 
         printf("Enter your 8-digit ID Number: ");
         if (scanf("%s", &accID) != 1 || strlen(accID) != 8) {
             printf("=============================================================\n");
-            printf("Invalid ID input. Must be 8 digit number.\n");
+            printf("Invalid ID input. Must be 8 digit number.\n"); 
             printf("=============================================================\n");
             while (getchar() != '\n');
         } else {
@@ -52,13 +55,14 @@ void createAccount() {
                 break;
             } else {
                 printf("=============================================================\n");
-                printf("Enter numbers only.\n");
+                printf("Enter numbers only.\n"); 
                 printf("=============================================================\n");
                 continue;
             }
         }
     }
 
+    //Account type input
     while (true) {
         printf("Type of account (Savings or Current): ");
         if (scanf("%9s", accType) != 1) {
@@ -85,6 +89,7 @@ void createAccount() {
         }
     }
 
+    //PIN input
     while (true) {
         isNum = true;
         
@@ -113,8 +118,13 @@ void createAccount() {
         }
     } 
 
+    //Generate Account Number
     accNum = generateAccNum();
+
+    //Insert into database
     insertDB(accName, accType, accID, pin, accNum);
+
+    //Log the transaction
      logTransaction("Create Account", accNum, 0);
 
     printf("=============================================\n");
@@ -128,11 +138,13 @@ void createAccount() {
     printf("=============================================\n");
 }
 
+// Delete Bank Account Function
 void deleteAccount() {
     char idLast4[50];
     int* accList = BankAccList(size);
     bool exist = false;
 
+    // List of existing accounts
     while (true) {
         printf("======================================\n");
         printf("Bank Account List:\n");
@@ -144,6 +156,7 @@ void deleteAccount() {
         printf("======================================\n");
         printf("Enter '0' to return to menu...\n");
 
+        //Account number input
         printf("Enter your bank account number: ");
         if (scanf("%d", &accNum) != 1) {
             printf("======================================\n");
@@ -177,6 +190,7 @@ void deleteAccount() {
         }
     }
 
+    // ID last 4 digits input
     while (true) {
         isNum = true;
 
@@ -205,6 +219,7 @@ void deleteAccount() {
         }
     }
 
+    // PIN input
     while (true) {
         isNum = true;
 
@@ -233,9 +248,12 @@ void deleteAccount() {
         }
     }
 
+    // Delete account
     deleteAcc(accNum, idLast4, pin);
 }
 
+
+// Deposit Function
 void deposit() {
     float amount;
 
@@ -244,6 +262,7 @@ void deposit() {
     printf("======================================\n");
     printf("Enter '0' to return to menu...\n");
 
+    // Account number input
     while (true) {
         printf("Enter your bank account number: ");
         if (scanf("%d", &accNum) != 1) {
@@ -268,6 +287,7 @@ void deposit() {
         }
     }
 
+    // PIN input
     while (true) {
         isNum = true;
 
@@ -296,6 +316,7 @@ void deposit() {
         }
     }
 
+    // Amount input
     while (true) {
         printf("Amount to deposit: ");
         if (scanf("%f", &amount) != 1 || amount <= 0 || amount > 50000) {
@@ -309,10 +330,14 @@ void deposit() {
         }
     }
 
+    // Deposit into account
     depositAcc(amount, accNum, pin);
+
+    // Log the transaction
     logTransaction("Deposit", accNum, amount);
 }
 
+// Withdrawal Function
 void withdrawal() {
     float amount;
 
@@ -321,6 +346,7 @@ void withdrawal() {
     printf("======================================\n");
     printf("Enter '0' to return to menu...\n");
 
+    // Account number input
     while (true) {
         printf("Enter your bank account number: ");
         if (scanf("%d", &accNum) != 1) {
@@ -345,6 +371,7 @@ void withdrawal() {
         }
     }
 
+    // PIN input
     while (true) {
         isNum = true;
 
@@ -373,6 +400,7 @@ void withdrawal() {
         }
     }
 
+    // Amount input
     while (true) {
         printf("Amount to withdraw: ");
         if (scanf("%f", &amount) != 1 || amount <= 0) {
@@ -386,10 +414,13 @@ void withdrawal() {
         }
     }
 
+    // Withdraw from account
     withdrawAcc(amount, accNum, pin);
+    // Log the transaction
     logTransaction("Withdrawal", accNum, amount);
 }
 
+// Remittance Function
 void remittance() {
     float amount;
     int senderAccNum;
@@ -400,6 +431,8 @@ void remittance() {
     printf("======================================\n");
     printf("Enter '0' to return to menu...\n");
 
+
+    // Sender Account Number input
     while (true) {
         printf("Sender Account Number: ");
 
@@ -425,6 +458,7 @@ void remittance() {
         }
     }
 
+    // PIN input
     while (true) {
         isNum = true;
 
@@ -453,6 +487,7 @@ void remittance() {
         }
     }
 
+    // Receiver Account Number input
     while (true) {
         printf("Receiver Account Number: ");
         if (scanf("%d", &receiverAccNum) != 1) {
@@ -480,6 +515,7 @@ void remittance() {
         return;
     }
 
+    // Amount input
     while (true) {
         printf("Amount to remit: ");
         if (scanf("%f", &amount) != 1 || amount <= 0) {
@@ -493,12 +529,17 @@ void remittance() {
         }
     }
 
+    // Remit amount
     remittanceAcc(amount, senderAccNum, receiverAccNum, pin);
+    // Log the transaction
     logTransaction("Remittance", senderAccNum, amount);
 }
 
+
+// Check Menu Input Function
 bool checkInput(char *input) {
     char *checkList[] = {"1", "create", "2", "delete", "3", "deposit", "4", "withdrawal", "5", "remittance", "6", "exit"};
+
     for (int i = 0; input[i]; i++) {
         input[i] = tolower(input[i]);
     }
@@ -510,7 +551,9 @@ bool checkInput(char *input) {
     return false;
 }
 
+// Menu Function
 char* menu() {
+    // Display menu and get user input
     while (true){
         printf("======================================\n");
         printf("            BANKING SYSTEM            \n");
@@ -536,6 +579,7 @@ char* menu() {
     }
 }
 
+// Show Session Information Function
 void showSessionInfo() {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
@@ -554,11 +598,16 @@ void showSessionInfo() {
 
 }
 
+
+// Main Function
 int main() {
     srand(time(NULL));
+    // Initialize database directory
     createDB();
+    // Show session information
     showSessionInfo();
     
+    // Main loop
     while (true) {
         menu();
         if (strcmp(input, "1") == 0 || strcmp(input, "create") == 0) {
