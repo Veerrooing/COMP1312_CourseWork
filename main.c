@@ -6,12 +6,14 @@
 #include <ctype.h>
 #include "DBFunct.h"
 
+// Global Variables
 char input[30];
 int size = 200;
 int accNum;
 char pin[50];
 bool isNum;
 
+// Create Bank Account Function
 void createAccount() {
     char accName[50];
     char accType[10];
