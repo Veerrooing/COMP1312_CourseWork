@@ -54,62 +54,44 @@ void insertDB(char accName[50], char accType[10], char accID[50], char pin[50], 
 
 // Generate Account Number Function
 int generateAccNum() {
-    char filename[20];
-    FILE *fptr;
     int accNum;
-
+    FILE *fptr;
+    int exists;
+    
     while (true) {
         int digits = (rand() % 3) + 7; 
         int min = 1;
-        for (int i = 1; i < digits; i++) min *= 10; 
-        int max = min * 10 - 1;                      
+        for (int i = 1; i < digits; i++) min *= 10;
+        int max = min * 10 - 1;
 
-        accNum = min + rand() % (max - min + 1);    
+        accNum = min + rand() % (max - min + 1);
 
-        sprintf(filename, "database/%d.txt", accNum);
-        fptr = fopen(filename, "r");
+        // Check uniqueness in index file
+        exists = 0;
+        fptr = fopen("database/index.txt", "r");
         if (fptr != NULL) {
-            printf("Account Number already exists. Please try again.\n");
+            int num;
+            while (fscanf(fptr, "%d", &num) == 1) {
+                if (num == accNum) {
+                    exists = 1;
+                    break;
+                }
+            }
             fclose(fptr);
-            continue;
-        } else {
+        }
+
+        if (!exists) {
+            // Append new account number to index
+            fptr = fopen("database/index.txt", "a");
+            if (fptr) {
+                fprintf(fptr, "%d\n", accNum);
+                fclose(fptr);
+            }
             return accNum;
         }
     }
 }
 
-// Get Bank Account List Function
-int *BankAccList(int size) {
-    char filename[20];
-    FILE *fptr;
-    char path[] = "database/";
-    DIR *dir;
-    struct dirent *entry;
-    int *accList = calloc(size, sizeof(int));
-    int count = 0;
-
-    dir = opendir(path);
-    if (!dir) {
-        perror("opendir");
-    }
-
-    while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-            continue;
-        }
-
-        char *dot = strrchr(entry->d_name, '.');
-        if (dot && strcmp(dot, ".txt") == 0) {
-            *dot = '\0';
-            accList[count] = atoi(entry->d_name);
-            count++;
-        }
-    }
-
-    closedir(dir);
-    return accList;
-
-}
 
 // Delete Bank Account Function
 void deleteAcc(int accNum, char idLast4[50], char inputPin[50]) {
@@ -179,7 +161,22 @@ void deleteAcc(int accNum, char idLast4[50], char inputPin[50]) {
         }
         }
 
+    FILE *fptrIndex = fopen("database/index.txt", "r");
+    FILE *fptrTemp = fopen("database/index_temp.txt", "w");
+    int num;
+    if (fptrIndex && fptrTemp) {
+        while (fscanf(fptrIndex, "%d", &num) == 1) {
+            if (num != accNum) {
+                fprintf(fptrTemp, "%d\n", num);
+            }
+        }
+        fclose(fptrIndex);
+        fclose(fptrTemp);
+        remove("database/index.txt");
+        rename("database/index_temp.txt", "database/index.txt");
     }
+}
+
 
 // Deposit Function
 void depositAcc(float amount, int accNum, char inputPin[50]) {
@@ -448,4 +445,19 @@ void logTransaction(const char* action, int accNum, float amount) {
     }
 
     fclose(fptr);
+}
+
+int* BankAccList(int size) {
+    int *accList = calloc(size, sizeof(int));
+    FILE *fptr = fopen("database/index.txt", "r");
+    int count = 0;
+    int num;
+
+    if (!fptr) return accList;
+
+    while (count < size && fscanf(fptr, "%d", &num) == 1) {
+        accList[count++] = num;
+    }
+    fclose(fptr);
+    return accList;
 }
