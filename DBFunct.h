@@ -153,7 +153,7 @@ void deleteAcc(int accNum, char idLast4[50], char inputPin[50]) {
             printf("======================================\n");
             printf("Account deletion cancelled.\n");
             printf("======================================\n");
-            break;
+            return;
         } else {
             printf("======================================\n");
             printf("Invalid input.\n");
